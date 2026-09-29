@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tdse-webframework</title>
+  <link rel="icon" href="/images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header>
+      <img src="/images/logo.png" alt="tdse-webframework" width="480" height="200" class="logo">
+      <h1>Servidor de aplicaciones con rutas lambda</h1>
+      <p class="lead">
+        Esta página, sus estilos, su script y sus imágenes los entrega el servicio de
+        archivos estáticos del framework. Los botones llaman servicios registrados
+        como funciones lambda, sin recargar la página.
+      </p>
+    </header>
+
+    <section>
+      <h2>Servicios registrados</h2>
+      <div class="services">
+        <form class="card" id="hello-form" novalidate>
+          <h3>/hello</h3>
+          <p><code>get("/hello", (req, resp) -&gt; ...)</code></p>
+          <label for="name">Nombre</label>
+          <input id="name" type="text" autocomplete="off" placeholder="Pedro">
+          <label for="language">Idioma</label>
+          <input id="language" type="text" autocomplete="off" placeholder="en o es" value="en">
+          <button type="submit">Saludar</button>
+        </form>
+
+        <div class="card">
+          <h3>/pi</h3>
+          <p><code>get("/pi", (req, resp) -&gt; String.valueOf(Math.PI))</code></p>
+          <button type="button" id="pi-button">Pedir el valor de PI</button>
+        </div>
+
+        <form class="card" id="square-form" novalidate>
+          <h3>/square</h3>
+          <p><code>get("/square", ...)</code> — valida la entrada y responde 400</p>
+          <label for="value">Número</label>
+          <input id="value" type="text" inputmode="decimal" autocomplete="off" placeholder="7">
+          <button type="submit">Calcular el cuadrado</button>
+        </form>
+
+        <div class="card">
+          <h3>/env</h3>
+          <p><code>get("/env", ...)</code> — configuración leída del ambiente</p>
+          <button type="button" id="env-button">Ver la configuración</button>
+        </div>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <pre id="result" hidden></pre>
+      <p id="error" role="alert" hidden></p>
+    </section>
+
+    <section>
+      <h2>Recursos estáticos de esta página</h2>
+      <ul class="resources">
+        <li><code>/index.html</code> &rarr; <span>text/html</span></li>
+        <li><code>/styles.css</code> &rarr; <span>text/css</span></li>
+        <li><code>/app.js</code> &rarr; <span>application/javascript</span></li>
+        <li><code>/images/logo.png</code> &rarr; <span>image/png</span></li>
+        <li><code>/images/architecture.jpg</code> &rarr; <span>image/jpeg</span></li>
+      </ul>
+      <img src="/images/architecture.jpg" alt="Servidor, router y lambdas"
+           width="480" height="300" class="photo">
+    </section>
+
+    <footer>
+      <p id="script-status">El script todavía no se ha ejecutado.</p>
+      <p>Una ruta que no existe responde 404: <a href="/unknown">/unknown</a></p>
+    </footer>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
