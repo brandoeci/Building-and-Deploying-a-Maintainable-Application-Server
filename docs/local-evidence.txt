@@ -1,0 +1,168 @@
+Evidencia de la ejecucion local - tdse-webframework
+Fecha: 2026-09-29 17:55:50 HPS
+Artefacto: target/tdse-webframework.jar
+
+==================================================================
+1. ARRANQUE EN DESARROLLO (variables por defecto)
+==================================================================
+$ java -jar tdse-webframework.jar
+APP_ENV=development: /shutdown is enabled
+tdse-webframework listening on http://0.0.0.0:8080
+Static files: classpath:/webroot/
+Routes: 6 registered, sequential mode
+
+==================================================================
+2. RECURSOS ESTATICOS
+==================================================================
+$ curl -i http://localhost:8080/
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 3230
+
+$ curl -i http://localhost:8080/index.html
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 3230
+
+$ curl -i http://localhost:8080/styles.css
+HTTP/1.1 200 OK
+Content-Type: text/css; charset=utf-8
+Content-Length: 2725
+
+$ curl -i http://localhost:8080/app.js
+HTTP/1.1 200 OK
+Content-Type: application/javascript; charset=utf-8
+Content-Length: 3273
+
+$ curl -i http://localhost:8080/images/logo.png
+HTTP/1.1 200 OK
+Content-Type: image/png
+Content-Length: 7169
+
+$ curl -i http://localhost:8080/images/architecture.jpg
+HTTP/1.1 200 OK
+Content-Type: image/jpeg
+Content-Length: 12961
+
+$ curl -i http://localhost:8080/images/favicon.png
+HTTP/1.1 200 OK
+Content-Type: image/png
+Content-Length: 1012
+
+==================================================================
+3. SERVICIOS LAMBDA
+==================================================================
+$ curl -i 'http://localhost:8080/hello'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> Hello world
+
+$ curl -i 'http://localhost:8080/hello?name=Pedro'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> Hello Pedro
+
+$ curl -i 'http://localhost:8080/hello?name=Ana%20Mar%C3%ADa'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> Hello Ana María
+
+$ curl -i 'http://localhost:8080/hello?name=Pedro&language=es'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> Hola Pedro
+
+$ curl -i 'http://localhost:8080/pi'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> 3.141592653589793
+
+$ curl -i 'http://localhost:8080/square?value=7'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> 7 squared is 49
+
+$ curl -i 'http://localhost:8080/square?value=-2.5'
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+   -> -2.5 squared is 6.25
+
+$ curl -i 'http://localhost:8080/time'
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+   -> {"time":"2026-09-29T17:55:52.0247973-05:00","zone":"America/Bogota"}
+
+$ curl -i 'http://localhost:8080/env'
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+   -> {"appEnv":"development","greetingPrefix":"Hello","port":"8080"}
+
+==================================================================
+4. ERRORES CONTROLADOS
+==================================================================
+$ curl -i http://localhost:8080/unknown    (ruta que no existe)
+HTTP/1.1 404 Not Found
+Content-Type: text/plain; charset=utf-8
+404 Not Found
+
+$ curl -i http://localhost:8080/no-existe.html    (archivo estatico que no existe)
+HTTP/1.1 404 Not Found
+
+$ curl -i 'http://localhost:8080/square?value=hola'    (parametro invalido)
+HTTP/1.1 400 Bad Request
+'hola' is not a number
+
+$ curl -i 'http://localhost:8080/square'    (parametro que falta: no falla el servidor)
+HTTP/1.1 400 Bad Request
+Send a number: /square?value=7
+
+$ curl -i -X POST http://localhost:8080/hello    (metodo no soportado)
+HTTP/1.1 405 Method Not Allowed
+Allow: GET
+
+$ curl -i --path-as-is http://localhost:8080/../pom.xml    (ruta insegura)
+HTTP/1.1 403 Forbidden
+
+$ printf 'ESTO NO ES HTTP\r\n\r\n' | nc localhost 8080    (peticion malformada)
+HTTP/1.1 400 Bad Request
+   el servidor sigue vivo: /pi -> HTTP 200
+
+==================================================================
+5. APAGADO ORDENADO EN DESARROLLO (/shutdown)
+==================================================================
+$ curl -i http://localhost:8080/shutdown
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Content-Length: 37
+Server will stop after this response.
+
+   La respuesta se escribio completa ANTES de cerrar nada.
+   Ultimas lineas del log del servidor:
+     GET /shutdown -> 200 text/plain; charset=utf-8 (37 bytes, 0 ms)
+     Server stopped gracefully.
+
+$ curl http://localhost:8080/pi    (ya no hay nadie escuchando)
+   -> sin respuesta, el proceso termino con codigo 0
+
+==================================================================
+6. ARRANQUE EN PRODUCCION (variables de ambiente distintas)
+==================================================================
+$ PORT=9090 APP_ENV=production GREETING_PREFIX=Hola java -jar tdse-webframework.jar
+APP_ENV=production: /shutdown is NOT registered
+tdse-webframework listening on http://0.0.0.0:9090
+Routes: 5 registered, sequential mode
+
+   El puerto cambio sin tocar el codigo:
+   GET http://localhost:9090/pi -> HTTP 200
+
+   GREETING_PREFIX cambia la respuesta del servicio:
+   GET /hello?name=Pedro -> Hola Pedro
+   GET /env              -> {"appEnv":"production","greetingPrefix":"Hola","port":"9090"}
+
+   /shutdown NO esta publicado en produccion:
+$ curl -i http://localhost:9090/shutdown
+HTTP/1.1 404 Not Found
+404 Not Found
+
+   Y el servidor sigue atendiendo despues del intento:
+   GET /pi -> HTTP 200

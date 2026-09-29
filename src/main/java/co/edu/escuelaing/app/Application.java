@@ -46,7 +46,7 @@ public class Application {
             }
             try {
                 double number = Double.parseDouble(value);
-                return value + " squared is " + (number * number);
+                return value + " squared is " + format(number * number);
             } catch (NumberFormatException e) {
                 resp.status(400);
                 return "'" + value + "' is not a number";
@@ -80,5 +80,13 @@ public class Application {
         }
 
         start();
+    }
+
+    /** Whole results read better without the trailing ".0". */
+    private static String format(double value) {
+        if (value == Math.rint(value) && Math.abs(value) < 1e15) {
+            return Long.toString((long) value);
+        }
+        return Double.toString(value);
     }
 }

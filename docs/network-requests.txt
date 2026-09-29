@@ -1,0 +1,21 @@
+Peticiones vistas en el navegador (Chromium, DevTools > Network)
+Ejecucion local en http://localhost:8080/
+
+ #  Metodo  URL                                  Estado  Tipo
+ 1  GET     /                                    200     text/html
+ 2  GET     /styles.css                          200     text/css
+ 3  GET     /images/logo.png                     200     image/png
+ 4  GET     /images/architecture.jpg             200     image/jpeg
+ 5  GET     /app.js                              200     application/javascript
+ 6  GET     /images/favicon.png                  200     image/png
+ 7  GET     /hello?name=Pedro&language=en        200     text/plain
+ 8  GET     /pi                                  200     text/plain
+ 9  GET     /square?value=9                      200     text/plain
+10  GET     /env                                 200     application/json
+11  GET     /square?value=abc                    400     text/plain
+
+Las peticiones 1 a 6 vienen de cargar UNA sola pagina: el navegador pide el
+documento y despues descubre adentro la hoja de estilos, el script, las
+imagenes y el icono. Las peticiones 7 a 11 las envio app.js con fetch(), sin
+recargar la pagina: la 7, 8, 9 y 10 las respondieron funciones lambda y la 11
+es la validacion del servicio /square devolviendo 400.

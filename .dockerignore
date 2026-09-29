@@ -1,0 +1,7 @@
+target/
+docs/
+.git/
+.gitignore
+.gitattributes
+README.md
+*.md
